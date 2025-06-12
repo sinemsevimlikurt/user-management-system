@@ -1,9 +1,17 @@
 # User Management System
 
-A comprehensive user management system built with Spring Boot, featuring JWT authentication, role-based authorization, and RESTful APIs.
+A comprehensive user management system with a Spring Boot backend and React frontend, featuring JWT authentication, role-based authorization, and a responsive UI.
+
+## Project Structure
+
+The project is organized into two main directories:
+
+- **`/backend`**: Spring Boot application with JWT authentication and RESTful APIs
+- **`/frontend`**: React application with Tailwind CSS for the user interface
 
 ## Technologies Used
 
+### Backend
 - **Java 17**
 - **Spring Boot 3.2.0**
 - **Spring Security** with JWT authentication
@@ -12,13 +20,22 @@ A comprehensive user management system built with Spring Boot, featuring JWT aut
 - **Maven** for dependency management
 - **Lombok** for reducing boilerplate code
 
+### Frontend
+- **React** with functional components and hooks
+- **React Router** for navigation
+- **Axios** for API requests
+- **Tailwind CSS** for styling
+- **JWT** for authentication
+
 ## Features
 
 - User registration and login with JWT authentication
 - Role-based authorization with Spring Security
+- Protected routes for authenticated users
 - User profile management
 - Admin dashboard for user management
-- RESTful API endpoints for user operations
+- Responsive UI with Tailwind CSS
+- JWT token validation and automatic logout on expiration
 
 ## Getting Started
 
@@ -26,13 +43,14 @@ A comprehensive user management system built with Spring Boot, featuring JWT aut
 
 - Java 17 or higher
 - Maven 3.6 or higher
+- Node.js 14 or higher
+- npm 6 or higher
 
-### Installation
+### Backend Installation
 
-1. Clone the repository:
+1. Navigate to the backend directory:
    ```bash
-   git clone https://github.com/yourusername/user-management-system.git
-   cd user-management-system
+   cd backend
    ```
 
 2. Build the project:
@@ -45,7 +63,26 @@ A comprehensive user management system built with Spring Boot, featuring JWT aut
    mvn spring-boot:run
    ```
 
-The application will start on `http://localhost:8080`.
+The backend will start on `http://localhost:8080`.
+
+### Frontend Installation
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm start
+   ```
+
+The frontend will start on `http://localhost:3000`.
 
 ### H2 Database Console
 
