@@ -11,6 +11,7 @@ import com.example.usermanagement.repository.RoleRepository;
 import com.example.usermanagement.repository.UserRepository;
 import com.example.usermanagement.security.jwt.JwtUtils;
 import com.example.usermanagement.security.services.UserDetailsImpl;
+import com.example.usermanagement.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
