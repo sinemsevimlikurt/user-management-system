@@ -36,12 +36,40 @@ const Navbar = () => {
                 </Link>
                 
                 {isAdmin && (
-                  <Link 
-                    to="/admin/users" 
-                    className={`text-gray-700 hover:text-blue-600 ${location.pathname.startsWith('/admin') ? 'font-semibold text-blue-600' : ''}`}
-                  >
-                    Admin Panel
-                  </Link>
+                  <div className="relative group">
+                    <button 
+                      className={`flex items-center text-gray-700 hover:text-blue-600 ${location.pathname.startsWith('/admin') ? 'font-semibold text-blue-600' : ''}`}
+                    >
+                      Admin Panel
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                      <Link 
+                        to="/admin/dashboard" 
+                        className={`block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 ${location.pathname === '/admin/dashboard' ? 'bg-blue-50 text-blue-600' : ''}`}
+                      >
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                          </svg>
+                          Dashboard
+                        </div>
+                      </Link>
+                      <Link 
+                        to="/admin/users" 
+                        className={`block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 ${location.pathname === '/admin/users' ? 'bg-blue-50 text-blue-600' : ''}`}
+                      >
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                          Kullanıcı Yönetimi
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
                 )}
                 
                 <button

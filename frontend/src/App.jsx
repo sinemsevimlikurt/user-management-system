@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
 import AdminUsers from './pages/AdminUsers'
+import AdminDashboard from './pages/AdminDashboard'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -27,6 +28,11 @@ function App() {
             } />
             
             {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
             <Route path="/admin/users" element={
               <ProtectedRoute adminOnly={true}>
                 <AdminUsers />
@@ -34,7 +40,7 @@ function App() {
             } />
             
             {/* Redirect Routes */}
-            <Route path="/admin" element={<Navigate to="/admin/users" />} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
             <Route path="/" element={<Navigate to="/profile" />} />
             
             {/* 404 Route */}
