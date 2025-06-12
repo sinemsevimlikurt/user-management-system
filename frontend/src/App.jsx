@@ -6,28 +6,38 @@ import PrivateRoute from './components/PrivateRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
-import AdminPanel from './pages/AdminPanel'
+import AdminUsers from './pages/AdminUsers'
 import NotFound from './pages/NotFound'
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100">
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* Protected Routes */}
             <Route path="/profile" element={
               <PrivateRoute>
                 <Profile />
               </PrivateRoute>
             } />
-            <Route path="/admin" element={
+            
+            {/* Admin Routes */}
+            <Route path="/admin/users" element={
               <PrivateRoute adminOnly={true}>
-                <AdminPanel />
+                <AdminUsers />
               </PrivateRoute>
             } />
-            <Route path="/" element={<Navigate to="/login" />} />
+            
+            {/* Redirect Routes */}
+            <Route path="/admin" element={<Navigate to="/admin/users" />} />
+            <Route path="/" element={<Navigate to="/profile" />} />
+            
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

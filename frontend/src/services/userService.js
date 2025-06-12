@@ -1,27 +1,59 @@
-import axios from 'axios';
-import authHeader from './authHeader';
-
-const API_URL = 'http://localhost:8080/api/users/';
+import { api } from './authService';
 
 const userService = {
+  // Get all users (admin only)
   getAllUsers: async () => {
-    const response = await axios.get(API_URL, { headers: authHeader() });
-    return response.data;
+    try {
+      const response = await api.get('/users/all');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching all users:', error);
+      throw error;
+    }
   },
   
+  // Get current user profile
+  getCurrentUser: async () => {
+    try {
+      const response = await api.get('/users/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      throw error;
+    }
+  },
+  
+  // Get user by ID (admin or self)
   getUserById: async (id) => {
-    const response = await axios.get(API_URL + id, { headers: authHeader() });
-    return response.data;
+    try {
+      const response = await api.get(`/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching user ${id}:`, error);
+      throw error;
+    }
   },
   
+  // Update user
   updateUser: async (id, userData) => {
-    const response = await axios.put(API_URL + id, userData, { headers: authHeader() });
-    return response.data;
+    try {
+      const response = await api.put(`/users/${id}`, userData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating user ${id}:`, error);
+      throw error;
+    }
   },
   
+  // Delete user
   deleteUser: async (id) => {
-    const response = await axios.delete(API_URL + id, { headers: authHeader() });
-    return response.data;
+    try {
+      const response = await api.delete(`/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting user ${id}:`, error);
+      throw error;
+    }
   }
 };
 

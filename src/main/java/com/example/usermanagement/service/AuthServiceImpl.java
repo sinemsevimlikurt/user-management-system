@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         // Authenticate the user
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getName(), loginRequest.getPassword()));
 
         // Set the authentication in the security context
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         return new JwtResponse(
                 jwt,
                 userDetails.getId(),
-                userDetails.getUsername(),
+                userDetails.getUsername(), // UserDetailsImpl still uses getUsername() method
                 userDetails.getEmail(),
                 roles
         );
@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
     public User registerUser(SignupRequest signupRequest) {
         // Create new user
         User user = new User();
-        user.setName(signupRequest.getUsername()); // Using name field instead of username
+        user.setName(signupRequest.getName()); // Using name field
         user.setEmail(signupRequest.getEmail());
         
         // Encode password
@@ -111,8 +111,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByName(username);
+    public boolean existsByName(String name) {
+        return userRepository.existsByName(name);
     }
 
     @Override

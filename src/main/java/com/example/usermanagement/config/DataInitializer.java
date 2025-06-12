@@ -30,46 +30,59 @@ public class DataInitializer implements CommandLineRunner {
         // Initialize roles if they don't exist
         initRoles();
         
-        // Create admin user if it doesn't exist
-        createAdminUserIfNotExists();
+        // Create admin and regular users if they don't exist
+        createUsersIfNotExist();
     }
 
     private void initRoles() {
         if (roleRepository.count() == 0) {
             Role userRole = new Role();
-            userRole.setName(ERole.ROLE_USER);
+            userRole.setName(ERole.USER);
             roleRepository.save(userRole);
 
-            Role modRole = new Role();
-            modRole.setName(ERole.ROLE_MODERATOR);
-            roleRepository.save(modRole);
-
             Role adminRole = new Role();
-            adminRole.setName(ERole.ROLE_ADMIN);
+            adminRole.setName(ERole.ADMIN);
             roleRepository.save(adminRole);
             
             System.out.println("Roles initialized successfully");
         }
     }
 
-    private void createAdminUserIfNotExists() {
-        if (!userRepository.existsByUsername("admin")) {
+    private void createUsersIfNotExist() {
+        // Create admin user if it doesn't exist
+        if (!userRepository.existsByName("admin")) {
             User adminUser = new User();
-            adminUser.setUsername("admin");
+            adminUser.setName("admin");
             adminUser.setEmail("admin@example.com");
             adminUser.setPassword(passwordEncoder.encode("admin123"));
-            adminUser.setFirstName("Admin");
-            adminUser.setLastName("User");
             adminUser.setEnabled(true);
 
-            Set<Role> roles = new HashSet<>();
-            Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+            Set<Role> adminRoles = new HashSet<>();
+            Role adminRole = roleRepository.findByName(ERole.ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Admin Role not found."));
-            roles.add(adminRole);
-            adminUser.setRoles(roles);
+            adminRoles.add(adminRole);
+            adminUser.setRoles(adminRoles);
 
             userRepository.save(adminUser);
             System.out.println("Admin user created successfully");
+        }
+        
+        // Create regular user if it doesn't exist
+        if (!userRepository.existsByName("user")) {
+            User regularUser = new User();
+            regularUser.setName("user");
+            regularUser.setEmail("user@example.com");
+            regularUser.setPassword(passwordEncoder.encode("user123"));
+            regularUser.setEnabled(true);
+
+            Set<Role> userRoles = new HashSet<>();
+            Role userRole = roleRepository.findByName(ERole.USER)
+                    .orElseThrow(() -> new RuntimeException("Error: User Role not found."));
+            userRoles.add(userRole);
+            regularUser.setRoles(userRoles);
+
+            userRepository.save(regularUser);
+            System.out.println("Regular user created successfully");
         }
     }
 }

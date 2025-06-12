@@ -11,7 +11,7 @@ public interface AuthService {
     /**
      * Authenticate a user and generate JWT token
      * 
-     * @param loginRequest contains username and password
+     * @param loginRequest contains name and password
      * @return JwtResponse with token and user details
      */
     JwtResponse authenticateUser(LoginRequest loginRequest);
@@ -25,12 +25,12 @@ public interface AuthService {
     User registerUser(SignupRequest signupRequest);
     
     /**
-     * Check if username exists
+     * Check if name exists
      * 
-     * @param username username to check
-     * @return true if username exists
+     * @param name name to check
+     * @return true if name exists
      */
-    boolean existsByUsername(String username);
+    boolean existsByName(String name);
     
     /**
      * Check if email exists
