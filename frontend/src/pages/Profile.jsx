@@ -159,7 +159,7 @@ const Profile = () => {
                     <div className="flex flex-wrap gap-2">
                       {userData.roles?.map((role, index) => (
                         <span key={index} className="px-2 py-1 bg-gray-200 text-gray-800 text-xs font-medium rounded">
-                          {role.replace('ROLE_', '')}
+                          {typeof role === 'string' ? role.replace('ROLE_', '') : role}
                         </span>
                       ))}
                     </div>

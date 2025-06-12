@@ -1,6 +1,9 @@
 import { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import Alert from '../components/Alert';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Button from '../components/Button';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -62,8 +65,15 @@ const Register = () => {
       // Remove confirmPassword before sending to API
       const { confirmPassword, ...userData } = formData;
       
-      console.log('Registering user:', userData);
-      await register(userData);
+      // Make sure we're sending the expected format
+      const registerData = {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password
+      };
+      
+      console.log('Registering user:', registerData);
+      await register(registerData);
       
       setMessage('Registration successful! You can now login.');
       setTimeout(() => navigate('/login'), 2000);
@@ -79,7 +89,7 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-8">
-      <div className="px-8 py-6 mx-4 text-left bg-white shadow-xl rounded-xl w-full max-w-md">
+      <div className="px-8 py-10 mx-4 text-left bg-white shadow-xl rounded-xl w-full max-w-md">
         <div className="flex justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-20 h-20 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -90,9 +100,10 @@ const Register = () => {
         
         <form onSubmit={handleRegister} className="mt-6">
           {message && (
-            <div className={`p-4 mb-4 text-sm rounded-lg ${message.includes('successful') ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`} role="alert">
-              {message}
-            </div>
+            <Alert 
+              type={message.includes('successful') ? 'success' : 'error'}
+              message={message}
+            />
           )}
           
           <div className="grid grid-cols-1 gap-4">
@@ -102,7 +113,7 @@ const Register = () => {
                 type="text"
                 name="name"
                 placeholder="Username"
-                className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full px-4 py-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm hover:border-blue-300 transition-all duration-300"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -115,7 +126,7 @@ const Register = () => {
                 type="email"
                 name="email"
                 placeholder="Email"
-                className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full px-4 py-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm hover:border-blue-300 transition-all duration-300"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -128,7 +139,7 @@ const Register = () => {
                 type="password"
                 name="password"
                 placeholder="Password"
-                className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full px-4 py-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm hover:border-blue-300 transition-all duration-300"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -142,7 +153,7 @@ const Register = () => {
                 type="password"
                 name="confirmPassword"
                 placeholder="Confirm Password"
-                className="w-full px-4 py-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                className="w-full px-4 py-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-sm hover:border-blue-300 transition-all duration-300"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
@@ -151,21 +162,16 @@ const Register = () => {
           </div>
           
           <div className="flex items-center justify-between mt-8">
-            <button
+            <Button
               type="submit"
-              className="w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-300"
-              disabled={loading}
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={loading}
+              loadingText="Creating Account..."
             >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processing...
-                </span>
-              ) : 'Register'}
-            </button>
+              Register
+            </Button>
           </div>
           
           <div className="mt-6 text-center">
