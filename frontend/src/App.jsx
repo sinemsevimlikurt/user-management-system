@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import PrivateRoute from './components/PrivateRoute'
+import ProtectedRoute from './components/ProtectedRoute'
 
 // Pages
 import Login from './pages/Login'
@@ -21,16 +21,16 @@ function App() {
             
             {/* Protected Routes */}
             <Route path="/profile" element={
-              <PrivateRoute>
+              <ProtectedRoute>
                 <Profile />
-              </PrivateRoute>
+              </ProtectedRoute>
             } />
             
             {/* Admin Routes */}
             <Route path="/admin/users" element={
-              <PrivateRoute adminOnly={true}>
+              <ProtectedRoute adminOnly={true}>
                 <AdminUsers />
-              </PrivateRoute>
+              </ProtectedRoute>
             } />
             
             {/* Redirect Routes */}
