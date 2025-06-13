@@ -1,15 +1,23 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/auth/';
-const API_BASE_URL = 'http://localhost:8080/api';
-
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: API_BASE_URL,
+// Create a new axios instance specifically for auth requests
+const authAxios = axios.create({
+  baseURL: '/api',  // Use relative URL with Vite proxy
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 10000 // 10 seconds timeout
+  withCredentials: true,  // Include credentials in requests
+  timeout: 15000 // 15 seconds timeout
+});
+
+// Create a separate instance for authenticated requests
+const api = axios.create({
+  baseURL: '/api',  // Use relative URL with Vite proxy
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true,  // Include credentials in requests
+  timeout: 15000 // 15 seconds timeout
 });
 
 // Add a request interceptor to include JWT token in requests
@@ -20,8 +28,14 @@ api.interceptors.request.use(
       if (userStr) {
         const user = JSON.parse(userStr);
         if (user && user.token) {
+          // Make sure the Authorization header is set correctly
           config.headers['Authorization'] = `Bearer ${user.token}`;
+          console.log('Adding auth token to request:', config.url);
+        } else {
+          console.warn('No token found in user object');
         }
+      } else {
+        console.warn('No user found in localStorage');
       }
     } catch (error) {
       console.error('Error processing auth token:', error);
@@ -55,20 +69,63 @@ api.interceptors.response.use(
 const authService = {
   login: async (name, password) => {
     try {
-      const response = await axios.post(API_URL + 'signin', { name, password });
-      if (response.data && response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+      console.log('Attempting login with username:', name);
+      
+      let responseData = null;
+      
+      try {
+        // Make direct request without using the intercepted instance
+        const response = await authAxios.post('/auth/signin', { 
+          name: name, 
+          password: password 
+        });
+        
+        console.log('Login response from standard endpoint:', response);
+        responseData = response.data;
+      } catch (firstError) {
+        console.log('First login attempt failed, trying alternative endpoint...', firstError.message);
+        
+        // Try the alternative endpoint
+        const altResponse = await axios.post('http://localhost:8080/api/auth/signin', {
+          name: name,
+          password: password
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        });
+        
+        console.log('Login response from alternative endpoint:', altResponse);
+        responseData = altResponse.data;
       }
-      return response.data;
+      
+      if (responseData && responseData.token) {
+        console.log('Login successful, token received');
+        
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(responseData));
+        
+        // Set the token in the default headers for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${responseData.token}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${responseData.token}`;
+        
+        console.log('Token stored in localStorage and set in axios headers');
+        
+        return responseData;
+      } else {
+        console.error('Invalid response format:', responseData);
+        throw new Error('Invalid response format from server');
+      }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error details:', error.response ? error.response.data : error.message);
       throw error;
     }
   },
   
   register: async (userData) => {
     try {
-      const response = await axios.post(API_URL + 'signup', userData);
+      const response = await authAxios.post('/auth/signup', userData);
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
@@ -87,10 +144,54 @@ const authService = {
   // Get user profile
   getUserProfile: async () => {
     try {
-      const response = await api.get('/users/me');
-      return response.data;
+      console.log('Attempting to fetch user profile from /api/users/me');
+      
+      // Get the user token from localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        console.error('No user found in localStorage');
+        throw new Error('User not authenticated');
+      }
+      
+      const user = JSON.parse(userStr);
+      if (!user || !user.token) {
+        console.error('No token found in user object');
+        throw new Error('Invalid authentication token');
+      }
+      
+      console.log('Token found in localStorage:', user.token.substring(0, 20) + '...');
+      
+      try {
+        // First try the standard endpoint with our configured API instance
+        console.log('Trying standard endpoint with api instance');
+        const response = await api.get('/users/me');
+        console.log('User profile fetched successfully:', response.data);
+        return response.data;
+      } catch (firstError) {
+        console.log('First attempt failed, trying alternative endpoint...', firstError.message);
+        
+        // Try with direct URL and explicit headers
+        console.log('Trying direct URL with explicit token');
+        const directResponse = await axios.get('http://localhost:8080/api/users/me', {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        });
+        
+        console.log('Direct profile endpoint response:', directResponse.data);
+        return directResponse.data;
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      
+      // If we get a 500 error, it might be due to authentication issues
+      if (error.response?.status === 500) {
+        console.log('Server error when fetching profile, might be an authentication issue');
+      }
+      
       throw error;
     }
   },

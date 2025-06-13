@@ -25,19 +25,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> globalExceptionHandler(Exception ex, WebRequest request) {
+        System.out.println("GlobalExceptionHandler: Handling general exception: " + ex.getMessage());
+        ex.printStackTrace();
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+        System.out.println("GlobalExceptionHandler: Handling BadCredentialsException: " + ex.getMessage());
         ErrorDetails errorDetails = new ErrorDetails(new Date(), "Invalid username or password", request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
     }
     
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), "Access denied", request.getDescription(false));
+        System.out.println("GlobalExceptionHandler: Handling AccessDeniedException: " + ex.getMessage());
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), "Access denied: " + ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
     

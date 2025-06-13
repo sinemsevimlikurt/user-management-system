@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"}, allowCredentials = "true", maxAge = 3600)
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping({"/api/test", "/test"})
 public class TestController {
     
     @GetMapping("/all")
@@ -28,5 +28,10 @@ public class TestController {
     @PreAuthorize("hasRole('ADMIN')")
     public String adminAccess() {
         return "Admin Board.";
+    }
+    
+    @GetMapping("/debug")
+    public String debugEndpoint() {
+        return "Debug endpoint working! CORS and basic connectivity is OK.";
     }
 }

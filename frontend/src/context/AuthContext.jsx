@@ -81,19 +81,31 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       
+      console.log('AuthContext: Attempting login with:', name);
       const data = await authService.login(name, password);
-      setCurrentUser(data);
+      console.log('AuthContext: Login successful, setting user data:', data);
       
-      // Fetch user profile after successful login
-      try {
-        const profileData = await authService.getUserProfile();
-        setUserProfile(profileData);
-      } catch (profileError) {
-        console.error('Error loading user profile after login:', profileError);
+      if (data && data.token) {
+        setCurrentUser(data);
+        
+        // Wait a moment before fetching profile to ensure token is properly set
+        setTimeout(async () => {
+          try {
+            console.log('AuthContext: Fetching user profile after login');
+            const profileData = await authService.getUserProfile();
+            console.log('AuthContext: Profile data received:', profileData);
+            setUserProfile(profileData);
+          } catch (profileError) {
+            console.error('Error loading user profile after login:', profileError);
+          }
+        }, 500);
+      } else {
+        throw new Error('Invalid response format from server');
       }
       
       return data;
     } catch (err) {
+      console.error('AuthContext: Login error:', err);
       const errorMessage = err.response?.data?.message || 'Giriş başarısız. Lütfen kullanıcı adı ve şifrenizi kontrol edin.';
       setError(errorMessage);
       throw err;

@@ -9,6 +9,7 @@ import Profile from './pages/Profile'
 import AdminUsers from './pages/AdminUsers'
 import AdminDashboard from './pages/AdminDashboard'
 import NotFound from './pages/NotFound'
+import TestConnection from './pages/TestConnection'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/test" element={<TestConnection />} />
             
             {/* Protected Routes */}
             <Route path="/profile" element={

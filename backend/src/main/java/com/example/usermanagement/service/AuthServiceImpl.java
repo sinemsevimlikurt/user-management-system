@@ -43,30 +43,44 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        // Authenticate the user
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getName(), loginRequest.getPassword()));
+        try {
+            System.out.println("AuthServiceImpl: Attempting to authenticate user: " + loginRequest.getName());
+            
+            // Authenticate the user
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getName(), loginRequest.getPassword()));
 
-        // Set the authentication in the security context
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        // Generate JWT token
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        
-        // Get user details
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+            System.out.println("AuthServiceImpl: Authentication successful for user: " + loginRequest.getName());
+            
+            // Set the authentication in the security context
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            // Generate JWT token
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            System.out.println("AuthServiceImpl: JWT token generated successfully");
+            
+            // Get user details
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(item -> item.getAuthority())
+                    .collect(Collectors.toList());
+            
+            System.out.println("AuthServiceImpl: User roles: " + roles);
 
-        // Return JWT response with token and user details
-        return new JwtResponse(
-                jwt,
-                userDetails.getId(),
-                userDetails.getUsername(), // UserDetailsImpl still uses getUsername() method
-                userDetails.getEmail(),
-                roles
-        );
+            // Return JWT response with token and user details
+            return new JwtResponse(
+                    jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(), // UserDetailsImpl still uses getUsername() method
+                    userDetails.getEmail(),
+                    roles
+            );
+        } catch (Exception e) {
+            System.err.println("AuthServiceImpl: Authentication error for user: " + loginRequest.getName());
+            System.err.println("AuthServiceImpl: Error details: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override

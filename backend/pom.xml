@@ -11,7 +11,7 @@
     <groupId>com.example</groupId>
     <artifactId>user-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>user-management-system</name>
+    <name>User Management System</name>
     <description>User Management System with Spring Boot</description>
     
     <properties>

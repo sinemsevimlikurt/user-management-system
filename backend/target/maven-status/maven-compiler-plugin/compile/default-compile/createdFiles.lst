@@ -9,7 +9,9 @@ com\example\usermanagement\exception\ResourceNotFoundException.class
 com\example\usermanagement\model\User.class
 com\example\usermanagement\model\Role.class
 com\example\usermanagement\service\AuthServiceImpl.class
+com\example\usermanagement\config\WebConfig.class
 com\example\usermanagement\security\services\UserDetailsServiceImpl.class
+com\example\usermanagement\config\CorsConfig.class
 com\example\usermanagement\security\WebSecurityConfig.class
 com\example\usermanagement\dto\LoginRequest.class
 com\example\usermanagement\controller\UserController.class

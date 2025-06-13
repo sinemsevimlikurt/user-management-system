@@ -3,11 +3,13 @@ C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\ex
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\security\WebSecurityConfig.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\service\AuthService.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\UserManagementApplication.java
+C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\config\CorsConfig.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\security\jwt\AuthTokenFilter.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\dto\SignupRequest.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\security\services\UserDetailsImpl.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\repository\UserRepository.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\service\AuthServiceImpl.java
+C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\config\WebConfig.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\security\jwt\JwtUtils.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\model\User.java
 C:\Users\PC\Documents\GitHub\user-management-system\backend\src\main\java\com\example\usermanagement\service\UserServiceImpl.java
