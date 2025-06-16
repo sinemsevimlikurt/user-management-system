@@ -31,9 +31,10 @@ public class UserController {
      * Get all users - accessible only to admins
      * @return list of all users
      */
-    @GetMapping("/all")
+    @GetMapping({"all", "/all"})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
+        logger.info("getAllUsers: Received request to get all users");
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
@@ -42,92 +43,87 @@ public class UserController {
      * Get current authenticated user's profile
      * @return current user profile
      */
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    @GetMapping({"/me", "me"})
+    public ResponseEntity<?> getCurrentUser() {
         logger.info("getCurrentUser: Received request to get current user profile");
         
-        if (authentication == null) {
-            // If authentication parameter is null, try to get it from SecurityContext
-            authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null) {
-                logger.error("getCurrentUser: No authentication found in parameter or SecurityContext");
+        try {
+            // Get authentication from SecurityContext
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                logger.error("getCurrentUser: No authentication found in SecurityContext");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No authentication found");
             }
-            logger.info("getCurrentUser: Retrieved authentication from SecurityContext");
-        }
-        
-        logger.info("getCurrentUser: Authentication principal: {}, type: {}", 
-                authentication.getPrincipal(), authentication.getPrincipal().getClass().getName());
-        logger.info("getCurrentUser: Authentication authorities: {}", authentication.getAuthorities());
-        
-        try {
-            String username = null;
-            Long userId = null;
             
-            // Extract username based on principal type
+            // Get principal from authentication
             Object principal = authentication.getPrincipal();
+            logger.info("getCurrentUser: Authentication principal type: {}", principal != null ? principal.getClass().getName() : "null");
+            
+            // Handle UserDetailsImpl case (most common)
             if (principal instanceof UserDetailsImpl) {
                 UserDetailsImpl userDetails = (UserDetailsImpl) principal;
-                username = userDetails.getUsername();
-                userId = userDetails.getId();
-                logger.info("getCurrentUser: Extracted username '{}' from UserDetailsImpl, id: {}", 
-                        username, userId);
+                Long userId = userDetails.getId();
+                String username = userDetails.getUsername();
                 
-                // Try to get user directly by ID if available
+                logger.info("getCurrentUser: Found UserDetailsImpl with ID: {} and username: {}", userId, username);
+                
+                // Try to get user by ID first
                 if (userId != null) {
-                    Optional<User> userById = userService.getUserById(userId);
-                    if (userById.isPresent()) {
-                        User user = userById.get();
-                        logger.info("getCurrentUser: Successfully retrieved user by ID: {}", user.getName());
-                        return ResponseEntity.ok(user);
-                    } else {
-                        logger.warn("getCurrentUser: User not found by ID: {}, falling back to username", userId);
+                    try {
+                        Optional<User> userOpt = userService.getUserById(userId);
+                        if (userOpt.isPresent()) {
+                            User user = userOpt.get();
+                            logger.info("getCurrentUser: Successfully retrieved user by ID: {}", user.getId());
+                            return ResponseEntity.ok(user);
+                        } else {
+                            logger.warn("getCurrentUser: User not found by ID: {}", userId);
+                        }
+                    } catch (Exception e) {
+                        logger.error("getCurrentUser: Error retrieving user by ID: {}", userId, e);
                     }
                 }
-            } else if (principal instanceof org.springframework.security.core.userdetails.User) {
-                username = ((org.springframework.security.core.userdetails.User) principal).getUsername();
-                logger.info("getCurrentUser: Extracted username '{}' from Spring Security User", username);
-            } else if (principal instanceof String) {
-                username = (String) principal;
-                logger.info("getCurrentUser: Using principal directly as username: {}", username);
                 
-                // Check if it's an anonymous user
+                // If ID lookup fails, try by username
+                if (username != null && !username.isEmpty()) {
+                    try {
+                        User user = userService.findByUsername(username);
+                        if (user != null) {
+                            logger.info("getCurrentUser: Successfully retrieved user by username: {}", username);
+                            return ResponseEntity.ok(user);
+                        } else {
+                            logger.warn("getCurrentUser: User not found by username: {}", username);
+                        }
+                    } catch (Exception e) {
+                        logger.error("getCurrentUser: Error retrieving user by username: {}", username, e);
+                    }
+                }
+                
+                logger.error("getCurrentUser: User not found with ID: {} and username: {}", userId, username);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            } 
+            // Handle String username case
+            else if (principal instanceof String) {
+                String username = (String) principal;
                 if ("anonymousUser".equals(username)) {
-                    logger.error("getCurrentUser: Anonymous user detected");
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Anonymous user not allowed");
                 }
-            } else {
-                logger.error("getCurrentUser: Unsupported principal type: {}", principal.getClass().getName());
+                
+                try {
+                    User user = userService.findByUsername(username);
+                    if (user != null) {
+                        return ResponseEntity.ok(user);
+                    }
+                } catch (Exception e) {
+                    logger.error("getCurrentUser: Error retrieving user by string username: {}", username, e);
+                }
+                
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + username);
+            }
+            // Unsupported principal type
+            else {
+                logger.error("getCurrentUser: Unsupported principal type: {}", principal != null ? principal.getClass().getName() : "null");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Unsupported authentication principal type");
-            }
-            
-            if (username == null || username.isEmpty()) {
-                logger.error("getCurrentUser: Could not extract username from authentication principal");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Could not extract username from authentication");
-            }
-            
-            // Get user by username
-            logger.info("getCurrentUser: Looking up user by username: {}", username);
-            Optional<User> userOpt = userService.getUserByName(username);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                logger.info("getCurrentUser: Successfully retrieved user: {}, id: {}, roles: {}", 
-                        user.getName(), user.getId(), user.getRoles());
-                return ResponseEntity.ok(user);
-            } else {
-                // Try one more approach with findByUsername
-                logger.info("getCurrentUser: User not found with getUserByName, trying findByUsername");
-                User user = userService.findByUsername(username);
-                if (user != null) {
-                    logger.info("getCurrentUser: Successfully retrieved user with findByUsername: {}", user.getName());
-                    return ResponseEntity.ok(user);
-                } else {
-                    logger.error("getCurrentUser: User not found with username: {}", username);
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                            .body("User not found with username: " + username);
-                }
+                        .body("Unsupported authentication type");
             }
         } catch (Exception e) {
             logger.error("getCurrentUser: Error retrieving user profile", e);

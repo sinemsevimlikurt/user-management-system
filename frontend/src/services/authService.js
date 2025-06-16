@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a new axios instance specifically for auth requests
 const authAxios = axios.create({
-  baseURL: '/api',  // Use relative URL with Vite proxy
+  baseURL: 'http://localhost:8080/api',  // Use direct URL to backend
   headers: {
     'Content-Type': 'application/json'
   },
@@ -12,7 +12,7 @@ const authAxios = axios.create({
 
 // Create a separate instance for authenticated requests
 const api = axios.create({
-  baseURL: '/api',  // Use relative URL with Vite proxy
+  baseURL: 'http://localhost:8080/api',  // Use direct URL to backend
   headers: {
     'Content-Type': 'application/json'
   },
@@ -71,34 +71,19 @@ const authService = {
     try {
       console.log('Attempting login with username:', name);
       
-      let responseData = null;
+      // Make direct request to the backend
+      const response = await axios.post('http://localhost:8080/api/auth/signin', { 
+        name: name, 
+        password: password 
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
       
-      try {
-        // Make direct request without using the intercepted instance
-        const response = await authAxios.post('/auth/signin', { 
-          name: name, 
-          password: password 
-        });
-        
-        console.log('Login response from standard endpoint:', response);
-        responseData = response.data;
-      } catch (firstError) {
-        console.log('First login attempt failed, trying alternative endpoint...', firstError.message);
-        
-        // Try the alternative endpoint
-        const altResponse = await axios.post('http://localhost:8080/api/auth/signin', {
-          name: name,
-          password: password
-        }, {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        });
-        
-        console.log('Login response from alternative endpoint:', altResponse);
-        responseData = altResponse.data;
-      }
+      console.log('Login response:', response);
+      const responseData = response.data;
       
       if (responseData && responseData.token) {
         console.log('Login successful, token received');
@@ -125,7 +110,12 @@ const authService = {
   
   register: async (userData) => {
     try {
-      const response = await authAxios.post('/auth/signup', userData);
+      const response = await axios.post('http://localhost:8080/api/auth/signup', userData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
       return response.data;
     } catch (error) {
       console.error('Registration error:', error);
@@ -148,10 +138,6 @@ const authService = {
       
       // Get the user token from localStorage
       const userStr = localStorage.getItem('user');
-      if (!userStr) {
-        console.error('No user found in localStorage');
-        throw new Error('User not authenticated');
-      }
       
       const user = JSON.parse(userStr);
       if (!user || !user.token) {
@@ -161,28 +147,18 @@ const authService = {
       
       console.log('Token found in localStorage:', user.token.substring(0, 20) + '...');
       
-      try {
-        // First try the standard endpoint with our configured API instance
-        console.log('Trying standard endpoint with api instance');
-        const response = await api.get('/users/me');
-        console.log('User profile fetched successfully:', response.data);
-        return response.data;
-      } catch (firstError) {
-        console.log('First attempt failed, trying alternative endpoint...', firstError.message);
-        
-        // Try with direct URL and explicit headers
-        console.log('Trying direct URL with explicit token');
-        const directResponse = await axios.get('http://localhost:8080/api/users/me', {
-          headers: {
-            'Authorization': `Bearer ${user.token}`,
-            'Content-Type': 'application/json'
-          },
-          withCredentials: true
-        });
-        
-        console.log('Direct profile endpoint response:', directResponse.data);
-        return directResponse.data;
-      }
+      // Use direct URL with explicit headers
+      console.log('Fetching user profile with direct URL');
+      const response = await axios.get('http://localhost:8080/api/users/me', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+      
+      console.log('User profile fetched successfully:', response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       console.error('Error details:', error.response?.data || error.message);
@@ -199,7 +175,22 @@ const authService = {
   // Admin only - get all users
   getAllUsers: async () => {
     try {
-      const response = await api.get('/users/all');
+      // Get the user token from localStorage
+      const userStr = localStorage.getItem('user');
+      const user = JSON.parse(userStr);
+      
+      if (!user || !user.token) {
+        console.error('No token found in user object');
+        throw new Error('Invalid authentication token');
+      }
+      
+      const response = await axios.get('http://localhost:8080/api/users/all', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching all users:', error);
